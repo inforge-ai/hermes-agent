@@ -384,7 +384,25 @@ class ZulipAdapter(BasePlatformAdapter):
                     )
                     await asyncio.sleep(retry_after)
                     return []
-                body = await resp.json(content_type=None)
+                # Guard against empty/non-JSON responses (network hiccups,
+                # unexpected status codes). Zulip's long-poll can return
+                # empty bodies on transient errors.
+                raw = await resp.read()
+                if not raw or not raw.strip():
+                    if resp.status != 200:
+                        logger.warning(
+                            "Zulip /events returned %d with empty body", resp.status
+                        )
+                    return []
+                try:
+                    body = json.loads(raw)
+                except (json.JSONDecodeError, ValueError):
+                    logger.warning(
+                        "Zulip /events returned non-JSON (status %d, %d bytes)",
+                        resp.status,
+                        len(raw),
+                    )
+                    return []
                 if body.get("result") == "error":
                     if body.get("code") == "BAD_EVENT_QUEUE_ID":
                         raise BadEventQueueError(body.get("msg", ""))
