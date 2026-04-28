@@ -2141,7 +2141,7 @@ class GatewayRunner:
                        "QQ_ALLOWED_USERS",
                        "YUANBAO_ALLOWED_USERS",
                        "ZULIP_ALLOWED_USERS",
-                       "GATEWAY_ALLOWED_USERS")
+                       "GATEWAY_ALLOWED_USERS"))
         _allow_all = os.getenv("GATEWAY_ALLOW_ALL_USERS", "").lower() in ("true", "1", "yes") or any(
             os.getenv(v, "").lower() in ("true", "1", "yes")
             for v in ("TELEGRAM_ALLOW_ALL_USERS", "DISCORD_ALLOW_ALL_USERS",
